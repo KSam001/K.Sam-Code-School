@@ -7,6 +7,9 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
+import ModulesPage from './pages/ModulesPage';
+import ModuleDetailPage from './pages/ModuleDetailPage';
+import ReviewPage from './pages/ReviewPage';
 
 export default function App() {
   return (
@@ -20,6 +23,9 @@ export default function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/modules" element={<ModulesPage />} />
+            <Route path="/modules/:id" element={<ModuleDetailPage />} />
+            <Route path="/review" element={<ReviewPage />} />
           </Route>
         </Routes>
       </AuthProvider>

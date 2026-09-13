@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -21,7 +21,7 @@ export default function Register() {
       try {
         await loginWithGoogle(tokenResponse.access_token);
         navigate('/dashboard', { state: { justAuthenticated: true } });
-      } catch (err) {
+      } catch {
         setError('Google authentication failed on server');
       }
     },

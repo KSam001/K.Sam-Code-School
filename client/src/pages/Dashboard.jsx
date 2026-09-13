@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import api from '../api/axios';
 
 export default function Dashboard() {
@@ -10,20 +10,20 @@ export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [showIntro, setShowIntro] = useState(Boolean(location.state?.justAuthenticated));
   const [quotePhase, setQuotePhase] = useState(false);
-  const [isFirstVisit, setIsFirstVisit] = useState(false);
+  const [isFirstVisit] = useState(() => {
+    const seenBeforeKey = `ksam_has_logged_in_${user?.id}`;
+    const seenBefore = localStorage.getItem(seenBeforeKey);
+    if (!seenBefore && user?.id) {
+      localStorage.setItem(seenBeforeKey, 'true');
+    }
+    return !seenBefore;
+  });
   const [isHovered, setIsHovered] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const introVideoRef = useRef(null);
   const profileMenuRef = useRef(null);
 
   useEffect(() => {
-    const seenBeforeKey = `ksam_has_logged_in_${user?.id}`;
-    const seenBefore = localStorage.getItem(seenBeforeKey);
-    if (!seenBefore && user?.id) {
-      localStorage.setItem(seenBeforeKey, 'true');
-    }
-    setIsFirstVisit(!seenBefore);
-
     api.get('/dashboard/stats')
       .then((res) => setStats(res.data.stats))
       .catch(() => setStats(null));
@@ -35,7 +35,7 @@ export default function Dashboard() {
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [user]);
+  }, []);
 
   const displayName = user?.name || user?.email?.split('@')[0] || 'User';
   const actionGreeting = isFirstVisit ? 'Glad to see you here,' : 'Welcome back,';
@@ -221,6 +221,14 @@ export default function Dashboard() {
                 <span className="text-xs font-mono font-bold text-zinc-400 group-hover:text-white transition shrink-0">01</span>
                 {isHovered && <span className="text-xs tracking-wider uppercase font-semibold animate-drop">Overview</span>}
               </Link>
+              <Link to="/modules" className="flex items-center space-x-4 text-white group py-1">
+                <span className="text-xs font-mono font-bold text-zinc-400 group-hover:text-white transition shrink-0">02</span>
+                {isHovered && <span className="text-xs tracking-wider uppercase font-semibold animate-drop">Modules</span>}
+              </Link>
+              <Link to="/review" className="flex items-center space-x-4 text-white group py-1">
+                <span className="text-xs font-mono font-bold text-zinc-400 group-hover:text-white transition shrink-0">03</span>
+                {isHovered && <span className="text-xs tracking-wider uppercase font-semibold animate-drop">Review</span>}
+              </Link>
             </nav>
           </div>
         </aside>
@@ -302,6 +310,12 @@ export default function Dashboard() {
                   : 'Add a module and exercises to start building your review queue.'}
               </p>
             </div>
+            <Link
+              to={stats && stats.dueReviewsCount > 0 ? '/review' : '/modules'}
+              className="bg-white text-black font-semibold px-6 py-3 rounded-full text-sm hover:bg-zinc-200 transition shrink-0"
+            >
+              {stats && stats.dueReviewsCount > 0 ? 'Start review' : 'Add exercises'}
+            </Link>
           </div>
 
         </main>
