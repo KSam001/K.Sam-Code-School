@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/useAuth';
 import api from '../api/axios';
+import Navbar from '../components/Navbar';
 
 export default function ModulesPage() {
-  const { logout } = useAuth();
   const navigate = useNavigate();
+
+  const [curriculum, setCurriculum] = useState([]);
+  const [curriculumLoading, setCurriculumLoading] = useState(true);
 
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,6 +24,11 @@ export default function ModulesPage() {
   };
 
   useEffect(() => {
+    api.get('/modules/curriculum')
+      .then((res) => setCurriculum(res.data.modules))
+      .catch(() => setCurriculum([]))
+      .finally(() => setCurriculumLoading(false));
+
     api.get('/modules')
       .then((res) => setModules(res.data.modules))
       .catch(() => setError('Could not load modules.'))
@@ -49,9 +56,7 @@ export default function ModulesPage() {
   };
 
   const handleDelete = async (id, moduleTitle) => {
-    if (!window.confirm(`Delete "${moduleTitle}" and all its exercises? This cannot be undone.`)) {
-      return;
-    }
+    if (!window.confirm(`Delete "${moduleTitle}" and all its exercises? This cannot be undone.`)) return;
 
     try {
       await api.delete(`/modules/${id}`);
@@ -62,116 +67,118 @@ export default function ModulesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100 font-sans">
+    <div className="min-h-screen bg-canvas">
+      <Navbar />
 
-      <header className="border-b border-white/10 bg-black/40 backdrop-blur-md sticky top-0 z-40 px-10 py-5 flex items-center justify-between">
-        <Link to="/dashboard" className="text-white text-xs font-black tracking-[0.3em] uppercase">
-          K.SAM CODE SCHOOL
-        </Link>
-        <div className="flex items-center space-x-4">
-          <Link to="/dashboard" className="text-xs text-zinc-400 hover:text-white transition">
-            Dashboard
-          </Link>
-          <Link to="/review" className="text-xs text-zinc-400 hover:text-white transition">
-            Review
-          </Link>
-          <button
-            onClick={logout}
-            className="bg-white/15 hover:bg-white hover:text-black border border-white/20 text-xs text-zinc-200 transition uppercase px-4 py-2 rounded-full font-bold cursor-pointer"
-          >
-            Sign out
-          </button>
-        </div>
-      </header>
+      <main className="max-w-3xl mx-auto px-4 pb-16 pt-2 space-y-8">
 
-      <main className="max-w-5xl mx-auto px-10 py-16 space-y-10">
+        <div>
+          <h1 className="text-[22px] font-semibold tracking-tight text-ink mb-1">Curriculum</h1>
+          <p className="text-sm text-steel mb-3">Structured lessons, free for every account.</p>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-black tracking-tighter" style={{ fontFamily: "'Syne', sans-serif" }}>
-              Modules
-            </h1>
-            <p className="text-sm text-zinc-400 mt-2">Organize what you're learning into modules, then add exercises to each.</p>
-          </div>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-white text-black font-semibold px-5 py-2.5 rounded-full text-sm hover:bg-zinc-200 transition cursor-pointer"
-          >
-            {showForm ? 'Cancel' : 'New module'}
-          </button>
+          {curriculumLoading ? (
+            <div className="h-20 bg-white rounded-card shadow-soft animate-pulse" />
+          ) : curriculum.length === 0 ? (
+            <div className="bg-white rounded-card p-5 shadow-soft text-sm text-steel">
+              No curriculum modules published yet.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {curriculum.map((mod) => (
+                <button
+                  key={mod.id}
+                  onClick={() => navigate(`/modules/${mod.id}`)}
+                  className="text-left bg-white rounded-card p-4 shadow-soft hover:shadow-card transition"
+                >
+                  <h3 className="font-medium text-ink mb-1">{mod.title}</h3>
+                  {mod.description && (
+                    <p className="text-xs text-steel line-clamp-2">{mod.description}</p>
+                  )}
+                  <p className="text-[11px] text-silver mt-2">
+                    {mod._count?.exercises || 0} exercise{mod._count?.exercises === 1 ? '' : 's'}
+                  </p>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {error && (
-          <div className="bg-zinc-900 border border-zinc-800 text-zinc-300 p-3.5 rounded-xl text-sm">
-            {error}
-          </div>
-        )}
-
-        {showForm && (
-          <form onSubmit={handleCreate} className="border border-white/15 bg-white/5 rounded-2xl p-6 space-y-4">
-            <input
-              type="text"
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Module title, e.g. Async JavaScript"
-              className="w-full bg-black/40 border border-white/10 text-white placeholder-zinc-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-white transition"
-            />
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Description (optional)"
-              rows={2}
-              className="w-full bg-black/40 border border-white/10 text-white placeholder-zinc-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-white transition resize-none"
-            />
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h2 className="text-lg font-semibold tracking-tight text-ink">Your modules</h2>
+              <p className="text-sm text-steel">Your own personal study modules.</p>
+            </div>
             <button
-              type="submit"
-              disabled={submitting}
-              className="bg-white text-black font-semibold px-5 py-2.5 rounded-full text-sm hover:bg-zinc-200 transition cursor-pointer disabled:opacity-50"
+              onClick={() => setShowForm(!showForm)}
+              className="bg-ink text-white font-medium px-4 py-2 rounded-pill text-sm"
             >
-              {submitting ? 'Creating...' : 'Create module'}
+              {showForm ? 'Cancel' : 'New module'}
             </button>
-          </form>
-        )}
+          </div>
 
-        {loading ? (
-          <p className="text-sm text-zinc-500">Loading modules...</p>
-        ) : modules.length === 0 ? (
-          <div className="border border-white/10 rounded-2xl p-12 text-center space-y-2">
-            <p className="text-zinc-300 font-medium">No modules yet</p>
-            <p className="text-sm text-zinc-500">Create your first module to start adding exercises.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {modules.map((module) => (
-              <div
-                key={module.id}
-                className="border border-white/15 bg-white/5 rounded-2xl p-6 space-y-3 hover:border-white/30 transition"
+          {error && (
+            <div className="bg-ashmist text-graphite p-3 rounded-lg text-sm mb-3">{error}</div>
+          )}
+
+          {showForm && (
+            <form onSubmit={handleCreate} className="bg-white rounded-card p-5 shadow-soft space-y-3 mb-3">
+              <input
+                type="text"
+                required
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Module title"
+                className="w-full bg-ashmist border border-softfog text-ink placeholder-silver rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-ink"
+              />
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Description (optional)"
+                rows={2}
+                className="w-full bg-ashmist border border-softfog text-ink placeholder-silver rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-ink resize-none"
+              />
+              <button
+                type="submit"
+                disabled={submitting}
+                className="bg-ink text-white font-medium px-4 py-2 rounded-pill text-sm disabled:opacity-50"
               >
-                <div className="flex items-start justify-between">
-                  <button
-                    onClick={() => navigate(`/modules/${module.id}`)}
-                    className="text-left cursor-pointer"
-                  >
-                    <h3 className="font-bold text-lg text-white hover:underline">{module.title}</h3>
-                  </button>
-                  <button
-                    onClick={() => handleDelete(module.id, module.title)}
-                    className="text-xs text-zinc-500 hover:text-red-400 transition cursor-pointer"
-                  >
-                    Delete
-                  </button>
+                {submitting ? 'Creating...' : 'Create module'}
+              </button>
+            </form>
+          )}
+
+          {loading ? (
+            <div className="h-20 bg-white rounded-card shadow-soft animate-pulse" />
+          ) : modules.length === 0 ? (
+            <div className="bg-white rounded-card p-6 shadow-soft text-center">
+              <p className="text-ink font-medium">No modules yet</p>
+              <p className="text-sm text-steel mt-1">Create your first module to start adding exercises.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {modules.map((mod) => (
+                <div key={mod.id} className="bg-white rounded-card p-4 shadow-soft">
+                  <div className="flex items-start justify-between mb-1">
+                    <button onClick={() => navigate(`/modules/${mod.id}`)} className="text-left">
+                      <h3 className="font-medium text-ink hover:underline">{mod.title}</h3>
+                    </button>
+                    <button
+                      onClick={() => handleDelete(mod.id, mod.title)}
+                      className="text-xs text-silver hover:text-alert transition"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                  {mod.description && <p className="text-xs text-steel">{mod.description}</p>}
+                  <p className="text-[11px] text-silver mt-2">
+                    {mod._count?.exercises || 0} exercise{mod._count?.exercises === 1 ? '' : 's'}
+                  </p>
                 </div>
-                {module.description && (
-                  <p className="text-sm text-zinc-400">{module.description}</p>
-                )}
-                <p className="text-xs text-zinc-500">
-                  {module._count?.exercises || 0} exercise{module._count?.exercises === 1 ? '' : 's'}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
 
       </main>
     </div>
