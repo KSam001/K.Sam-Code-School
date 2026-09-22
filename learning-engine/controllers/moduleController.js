@@ -14,6 +14,7 @@ exports.createModule = asyncHandler(async (req, res) => {
       title,
       description: description || null,
       userId: req.user.userId,
+      isCurriculum: false,
     },
   });
 
@@ -22,7 +23,7 @@ exports.createModule = asyncHandler(async (req, res) => {
 
 exports.getUserModules = asyncHandler(async (req, res) => {
   const modules = await db.module.findMany({
-    where: { userId: req.user.userId },
+    where: { userId: req.user.userId, isCurriculum: false },
     include: { _count: { select: { exercises: true } } },
     orderBy: { createdAt: 'desc' },
   });
@@ -34,7 +35,10 @@ exports.getModuleById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const moduleItem = await db.module.findFirst({
-    where: { id, userId: req.user.userId },
+    where: {
+      id,
+      OR: [{ userId: req.user.userId }, { isCurriculum: true }],
+    },
     include: { exercises: true },
   });
 
@@ -49,7 +53,7 @@ exports.deleteModule = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const existingModule = await db.module.findFirst({
-    where: { id, userId: req.user.userId },
+    where: { id, userId: req.user.userId, isCurriculum: false },
   });
 
   if (!existingModule) {
@@ -59,4 +63,21 @@ exports.deleteModule = asyncHandler(async (req, res) => {
   await db.module.delete({ where: { id } });
 
   res.json({ message: 'Module deleted successfully.' });
+});
+
+exports.getCurriculum = asyncHandler(async (req, res) => {
+  const modules = await db.module.findMany({
+    where: { isCurriculum: true },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      stage: true,
+      order: true,
+      _count: { select: { exercises: true } },
+    },
+    orderBy: [{ stage: 'asc' }, { order: 'asc' }],
+  });
+
+  res.json({ modules });
 });
