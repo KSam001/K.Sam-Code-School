@@ -7,8 +7,11 @@ export default function ProtectedRoute() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center text-brand-500 font-mono">
-        Loading K.Sam Code School...
+      <div className="min-h-screen bg-canvas flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-5 h-5 border-2 border-softfog border-t-ink rounded-full animate-spin" />
+          <p className="text-sm text-steel">Loading K.Sam Code School</p>
+        </div>
       </div>
     );
   }
