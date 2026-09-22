@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement } from 'chart.js';
+import { Bar } from 'react-chartjs-2';
 import { useAuth } from '../context/useAuth';
 import api from '../api/axios';
-import Navbar from '../components/Navbar';
+import Layout from '../components/Layout';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement);
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -19,59 +23,71 @@ export default function Dashboard() {
   const displayName = user?.name || user?.email?.split('@')[0] || 'there';
   const dueCount = stats?.dueReviewsCount || 0;
 
+  const chartData = {
+    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    datasets: [
+      {
+        data: [0, 0, 0, 0, 0, 0, stats?.totalReviewsLogged ? 1 : 0],
+        backgroundColor: '#dcfce7',
+        borderRadius: 4,
+        maxBarThickness: 18,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#a3a3a3' } },
+      y: { display: false },
+    },
+  };
+
   return (
-    <div className="min-h-screen bg-canvas">
-      <Navbar />
+    <Layout>
+      <p className="text-lg font-semibold text-ink mb-3">
+        {loading ? 'Loading...' : `Good to see you, ${displayName}`}
+      </p>
 
-      <main className="max-w-3xl mx-auto px-4 pb-16 pt-2">
-        <div className="bg-white rounded-card p-5 mb-3 shadow-soft">
-          <p className="text-[11px] tracking-wide text-silver mb-1.5">WELCOME BACK</p>
-          {loading ? (
-            <div className="h-8 w-32 bg-softfog rounded animate-pulse" />
-          ) : (
-            <p className="text-[29px] font-semibold tracking-tight text-ink">{displayName}</p>
-          )}
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        <div className="bg-ink rounded-card p-3">
+          <p className="text-[11px] text-silver mb-1">XP total</p>
+          <p className="text-lg font-semibold text-resolve">{loading ? '—' : (stats?.totalReviewsLogged || 0) * 10}</p>
         </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3">
-          {[
-            { label: 'Modules', value: stats?.totalModules },
-            { label: 'Exercises', value: stats?.totalExercises },
-            { label: 'Reviewed', value: stats?.totalReviewsLogged },
-            { label: 'Streak', value: stats?.currentStreakDays },
-          ].map((card) => (
-            <div key={card.label} className="bg-white rounded-card p-3.5 shadow-soft">
-              <p className="text-xs text-steel mb-1.5">{card.label}</p>
-              {loading ? (
-                <div className="h-5 w-8 bg-softfog rounded animate-pulse" />
-              ) : (
-                <p className="text-xl font-semibold text-ink">{card.value ?? 0}</p>
-              )}
-            </div>
-          ))}
+        <div className="bg-white border border-softfog rounded-card p-3">
+          <p className="text-[11px] text-steel mb-1">Streak</p>
+          <p className="text-lg font-semibold text-ink">{loading ? '—' : `${stats?.currentStreakDays || 0} days`}</p>
         </div>
+        <div className="bg-white border border-softfog rounded-card p-3">
+          <p className="text-[11px] text-steel mb-1">Modules</p>
+          <p className="text-lg font-semibold text-ink">{loading ? '—' : stats?.totalModules || 0}</p>
+        </div>
+      </div>
 
-        <div className="bg-white rounded-card p-4.5 sm:p-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-card">
-          <div>
-            <p className="text-[15px] font-medium text-ink">
-              {loading
-                ? 'Checking your queue...'
-                : dueCount > 0
-                ? `${dueCount} exercise${dueCount === 1 ? '' : 's'} due for review`
-                : 'Nothing due right now'}
-            </p>
-            <p className="text-[13px] text-steel mt-0.5">
-              {dueCount > 0 ? 'Keep your streak going.' : 'Add exercises to build your queue.'}
-            </p>
-          </div>
+      <div className="bg-white border border-softfog rounded-card p-3.5 mb-3">
+        <p className="text-xs font-medium text-graphite mb-2.5">Reviews this week</p>
+        <div className="h-24">
+          <Bar data={chartData} options={chartOptions} />
+        </div>
+      </div>
+
+      <div className="bg-white border border-softfog rounded-card overflow-hidden">
+        <div className="flex items-center justify-between px-3.5 py-3">
+          <span className="text-sm font-medium text-ink">
+            {loading ? 'Checking your queue...' : dueCount > 0 ? `${dueCount} due for review` : 'Nothing due right now'}
+          </span>
           <Link
             to={dueCount > 0 ? '/review' : '/modules'}
-            className="bg-resolve text-ink rounded-pill px-5 py-2.5 text-sm font-medium text-center"
+            className={`text-[11px] px-2.5 py-1 rounded-pill font-medium ${
+              dueCount > 0 ? 'text-resolvetext bg-resolvebg' : 'text-graphite bg-ashmist'
+            }`}
           >
             {dueCount > 0 ? 'Start review' : 'Add exercises'}
           </Link>
         </div>
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 }

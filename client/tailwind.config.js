@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        canvas: '#fffdf9',
+        canvas: '#f7f5ef',
         white: '#ffffff',
         ashmist: '#f5f5f5',
         softfog: '#f0f0f0',
@@ -16,6 +16,10 @@ export default {
         steel: '#737373',
         silver: '#a3a3a3',
         resolve: '#22c55e',
+        resolvebg: '#f0fdf4',
+        resolvetext: '#15803d',
+        warnbg: '#fffbeb',
+        warntext: '#b45309',
         alert: '#ef4444',
       },
       fontFamily: {
