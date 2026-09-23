@@ -7,7 +7,12 @@ export const AuthProvider = ({ children }) => {
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
   });
-  const [loading, setLoading] = useState(true);
+  // Only block rendering when we have a token but no cached user to show
+  // optimistically. If a cached user already exists, render it immediately
+  // and revalidate with the server in the background (stale-while-revalidate).
+  const [loading, setLoading] = useState(() => {
+    return Boolean(localStorage.getItem('token')) && !localStorage.getItem('user');
+  });
 
   const logout = () => {
     localStorage.removeItem('token');
@@ -16,23 +21,31 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const res = await api.get('/auth/me');
-          setUser(res.data.user);
-          localStorage.setItem('user', JSON.stringify(res.data.user));
-        } catch {
-          logout();
-        }
-      } else {
-        setUser(null);
-      }
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setUser(null);
       setLoading(false);
-    };
+      return;
+    }
 
-    checkAuthStatus();
+    let cancelled = false;
+
+    api.get('/auth/me')
+      .then((res) => {
+        if (cancelled) return;
+        setUser(res.data.user);
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+      })
+      .catch(() => {
+        if (!cancelled) logout();
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
