@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 import api from '../api/axios';
 
 const QUALITY_OPTIONS = [
-  { label: 'Again', value: 0, style: 'bg-red-500/15 border-red-500/30 hover:bg-red-500/25 text-red-300' },
-  { label: 'Hard', value: 3, style: 'bg-amber-500/15 border-amber-500/30 hover:bg-amber-500/25 text-amber-300' },
-  { label: 'Good', value: 4, style: 'bg-emerald-500/15 border-emerald-500/30 hover:bg-emerald-500/25 text-emerald-300' },
-  { label: 'Easy', value: 5, style: 'bg-blue-500/15 border-blue-500/30 hover:bg-blue-500/25 text-blue-300' },
+  { label: 'Again', value: 0, style: 'bg-red-50 border-red-200 hover:bg-red-100 text-alert' },
+  { label: 'Hard', value: 3, style: 'bg-warnbg border-amber-200 hover:bg-amber-100 text-warntext' },
+  { label: 'Good', value: 4, style: 'bg-resolvebg border-green-200 hover:bg-green-100 text-resolvetext' },
+  { label: 'Easy', value: 5, style: 'bg-focusbg border-blue-200 hover:bg-blue-100 text-focustext' },
 ];
 
 export default function ReviewPage() {
@@ -48,65 +48,68 @@ export default function ReviewPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100 font-sans flex flex-col">
+    <div className="min-h-screen bg-canvas flex flex-col">
 
-      <header className="border-b border-white/10 bg-black/40 backdrop-blur-md sticky top-0 z-40 px-10 py-5 flex items-center justify-between">
-        <Link to="/dashboard" className="text-white text-xs font-black tracking-[0.3em] uppercase">
-          K.SAM CODE SCHOOL
+      <header className="border-b border-softfog bg-canvas sticky top-0 z-40 px-5 py-3.5 flex items-center justify-between">
+        <Link to="/dashboard" className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-lg bg-ink flex items-center justify-center">
+            <span className="text-white text-xs font-semibold">K</span>
+          </div>
+          <span className="text-sm font-semibold text-ink">K.Sam Code School</span>
         </Link>
-        <Link to="/dashboard" className="text-xs text-zinc-400 hover:text-white transition">
+        <Link to="/dashboard" className="text-xs text-steel hover:text-ink transition">
           Exit review
         </Link>
       </header>
 
-      <main className="flex-1 flex items-center justify-center p-10">
+      <main className="flex-1 flex items-center justify-center p-6">
         {loading ? (
-          <p className="text-sm text-zinc-500">Loading your review queue...</p>
+          <p className="text-sm text-steel">Loading your review queue...</p>
         ) : queue.length === 0 ? (
-          <div className="text-center space-y-4 max-w-md">
-            <h1 className="text-3xl font-black tracking-tighter" style={{ fontFamily: "'Syne', sans-serif" }}>
+          <div className="text-center space-y-3 max-w-md">
+            <h1 className="text-[22px] font-semibold tracking-tight text-ink">
               Nothing due right now
             </h1>
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-steel">
               You're all caught up. Come back once your next reviews are scheduled, or add more exercises to your modules.
             </p>
             <Link
               to="/modules"
-              className="inline-block bg-white text-black font-semibold px-5 py-2.5 rounded-full text-sm hover:bg-zinc-200 transition mt-2"
+              className="inline-block bg-ink text-white font-medium px-5 py-2.5 rounded-pill text-sm hover:bg-graphite transition mt-2"
             >
               Go to modules
             </Link>
           </div>
         ) : isDone ? (
-          <div className="text-center space-y-4 max-w-md">
-            <h1 className="text-3xl font-black tracking-tighter" style={{ fontFamily: "'Syne', sans-serif" }}>
+          <div className="text-center space-y-3 max-w-md">
+            <h1 className="text-[22px] font-semibold tracking-tight text-ink">
               Review complete
             </h1>
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-steel">
               You reviewed {completedCount} exercise{completedCount === 1 ? '' : 's'}. Nice work.
             </p>
             <Link
               to="/dashboard"
-              className="inline-block bg-white text-black font-semibold px-5 py-2.5 rounded-full text-sm hover:bg-zinc-200 transition mt-2"
+              className="inline-block bg-ink text-white font-medium px-5 py-2.5 rounded-pill text-sm hover:bg-graphite transition mt-2"
             >
               Back to dashboard
             </Link>
           </div>
         ) : (
-          <div className="w-full max-w-xl space-y-8">
-            <div className="text-center text-xs text-zinc-500 uppercase tracking-widest">
+          <div className="w-full max-w-xl space-y-6">
+            <div className="text-center text-xs text-silver uppercase tracking-widest">
               {currentIndex + 1} of {queue.length}
             </div>
 
-            <div className="border border-white/15 bg-white/5 rounded-2xl p-10 space-y-6 min-h-[220px] flex flex-col justify-center">
-              <p className="text-xl font-medium text-white text-center">
+            <div className="bg-white border border-softfog shadow-card rounded-card p-8 space-y-5 min-h-[200px] flex flex-col justify-center">
+              <p className="text-lg font-medium text-ink text-center">
                 {currentItem.exercise.questionText}
               </p>
 
               {showAnswer && (
-                <div className="border-t border-white/10 pt-6 text-center">
-                  <p className="text-sm text-zinc-400 uppercase tracking-widest mb-2">Answer</p>
-                  <p className="text-lg text-zinc-200">{currentItem.exercise.correctAnswer}</p>
+                <div className="border-t border-softfog pt-5 text-center">
+                  <p className="text-xs text-silver uppercase tracking-widest mb-1.5">Answer</p>
+                  <p className="text-base text-graphite">{currentItem.exercise.correctAnswer}</p>
                 </div>
               )}
             </div>
@@ -114,18 +117,18 @@ export default function ReviewPage() {
             {!showAnswer ? (
               <button
                 onClick={() => setShowAnswer(true)}
-                className="w-full bg-white text-black font-semibold py-3.5 rounded-full text-sm hover:bg-zinc-200 transition cursor-pointer"
+                className="w-full bg-ink text-white font-medium py-3.5 rounded-pill text-sm hover:bg-graphite transition"
               >
                 Show answer
               </button>
             ) : (
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-4 gap-2.5">
                 {QUALITY_OPTIONS.map((option) => (
                   <button
                     key={option.value}
                     onClick={() => handleRate(option.value)}
                     disabled={submitting}
-                    className={`border rounded-xl py-3 text-sm font-semibold transition cursor-pointer disabled:opacity-50 ${option.style}`}
+                    className={`border rounded-card py-3 text-sm font-medium transition disabled:opacity-50 ${option.style}`}
                   >
                     {option.label}
                   </button>

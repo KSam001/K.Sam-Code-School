@@ -83,6 +83,8 @@ export default function Register() {
             <input
               type="text"
               required
+              autoComplete="name"
+              aria-label="Full name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Full name"
@@ -91,6 +93,8 @@ export default function Register() {
             <input
               type="email"
               required
+              autoComplete="email"
+              aria-label="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email address"
@@ -99,6 +103,8 @@ export default function Register() {
             <input
               type="password"
               required
+              autoComplete="new-password"
+              aria-label="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password (min. 8 characters)"
@@ -107,6 +113,8 @@ export default function Register() {
             <input
               type="password"
               required
+              autoComplete="new-password"
+              aria-label="Confirm password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm password"

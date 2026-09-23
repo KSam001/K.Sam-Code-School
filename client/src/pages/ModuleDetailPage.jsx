@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import Layout from '../components/Layout';
 
 export default function ModuleDetailPage() {
   const { id } = useParams();
@@ -50,118 +51,102 @@ export default function ModuleDetailPage() {
 
   if (notFound) {
     return (
-      <div className="min-h-screen bg-black text-zinc-100 flex flex-col items-center justify-center space-y-4">
-        <p className="text-zinc-300">Module not found.</p>
-        <button
-          onClick={() => navigate('/modules')}
-          className="text-sm text-white underline underline-offset-4"
-        >
-          Back to modules
-        </button>
-      </div>
+      <Layout>
+        <div className="flex flex-col items-center justify-center py-20 space-y-4">
+          <p className="text-steel">Module not found.</p>
+          <button
+            onClick={() => navigate('/modules')}
+            className="text-sm text-ink font-medium underline underline-offset-4"
+          >
+            Back to modules
+          </button>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100 font-sans">
+    <Layout>
+      {loading ? (
+        <div className="h-20 bg-white rounded-card shadow-soft animate-pulse" />
+      ) : (
+        <div className="space-y-6">
+          <div>
+            <button
+              onClick={() => navigate('/modules')}
+              className="text-xs text-steel hover:text-ink transition"
+            >
+              ← Back to modules
+            </button>
+            <h1 className="text-[22px] font-semibold tracking-tight text-ink mt-2">
+              {moduleData.title}
+            </h1>
+            {moduleData.description && (
+              <p className="text-sm text-steel mt-1">{moduleData.description}</p>
+            )}
+          </div>
 
-      <header className="border-b border-white/10 bg-black/40 backdrop-blur-md sticky top-0 z-40 px-10 py-5 flex items-center justify-between">
-        <Link to="/dashboard" className="text-white text-xs font-black tracking-[0.3em] uppercase">
-          K.SAM CODE SCHOOL
-        </Link>
-        <div className="flex items-center space-x-4">
-          <Link to="/modules" className="text-xs text-zinc-400 hover:text-white transition">
-            Modules
-          </Link>
-          <Link to="/review" className="text-xs text-zinc-400 hover:text-white transition">
-            Review
-          </Link>
-        </div>
-      </header>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold tracking-tight text-ink">
+              Exercises ({moduleData.exercises.length})
+            </h2>
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="bg-ink text-white font-medium px-4 py-2 rounded-pill text-sm hover:bg-graphite transition"
+            >
+              {showForm ? 'Cancel' : 'Add exercise'}
+            </button>
+          </div>
 
-      <main className="max-w-3xl mx-auto px-10 py-16 space-y-10">
+          {error && (
+            <div className="bg-ashmist text-graphite p-3 rounded-lg text-sm">{error}</div>
+          )}
 
-        {loading ? (
-          <p className="text-sm text-zinc-500">Loading...</p>
-        ) : (
-          <>
-            <div>
-              <Link to="/modules" className="text-xs text-zinc-500 hover:text-white transition">
-                ← Back to modules
-              </Link>
-              <h1 className="text-4xl font-black tracking-tighter mt-3" style={{ fontFamily: "'Syne', sans-serif" }}>
-                {moduleData.title}
-              </h1>
-              {moduleData.description && (
-                <p className="text-sm text-zinc-400 mt-2">{moduleData.description}</p>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-white">
-                Exercises ({moduleData.exercises.length})
-              </h2>
+          {showForm && (
+            <form onSubmit={handleCreateExercise} className="bg-white border border-softfog rounded-card p-5 shadow-soft space-y-3">
+              <textarea
+                required
+                value={questionText}
+                onChange={(e) => setQuestionText(e.target.value)}
+                placeholder="Question"
+                rows={2}
+                className="w-full bg-ashmist border border-softfog text-ink placeholder-silver rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-ink transition resize-none"
+              />
+              <textarea
+                required
+                value={correctAnswer}
+                onChange={(e) => setCorrectAnswer(e.target.value)}
+                placeholder="Correct answer"
+                rows={2}
+                className="w-full bg-ashmist border border-softfog text-ink placeholder-silver rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-ink transition resize-none"
+              />
               <button
-                onClick={() => setShowForm(!showForm)}
-                className="bg-white text-black font-semibold px-5 py-2.5 rounded-full text-sm hover:bg-zinc-200 transition cursor-pointer"
+                type="submit"
+                disabled={submitting}
+                className="bg-ink text-white font-medium px-4 py-2 rounded-pill text-sm hover:bg-graphite transition disabled:opacity-50"
               >
-                {showForm ? 'Cancel' : 'Add exercise'}
+                {submitting ? 'Adding...' : 'Add exercise'}
               </button>
+            </form>
+          )}
+
+          {moduleData.exercises.length === 0 ? (
+            <div className="bg-white border border-softfog rounded-card p-10 text-center space-y-1.5">
+              <p className="text-ink font-medium">No exercises yet</p>
+              <p className="text-sm text-steel">Add your first exercise to start reviewing this module.</p>
             </div>
-
-            {error && (
-              <div className="bg-zinc-900 border border-zinc-800 text-zinc-300 p-3.5 rounded-xl text-sm">
-                {error}
-              </div>
-            )}
-
-            {showForm && (
-              <form onSubmit={handleCreateExercise} className="border border-white/15 bg-white/5 rounded-2xl p-6 space-y-4">
-                <textarea
-                  required
-                  value={questionText}
-                  onChange={(e) => setQuestionText(e.target.value)}
-                  placeholder="Question"
-                  rows={2}
-                  className="w-full bg-black/40 border border-white/10 text-white placeholder-zinc-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-white transition resize-none"
-                />
-                <textarea
-                  required
-                  value={correctAnswer}
-                  onChange={(e) => setCorrectAnswer(e.target.value)}
-                  placeholder="Correct answer"
-                  rows={2}
-                  className="w-full bg-black/40 border border-white/10 text-white placeholder-zinc-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-white transition resize-none"
-                />
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="bg-white text-black font-semibold px-5 py-2.5 rounded-full text-sm hover:bg-zinc-200 transition cursor-pointer disabled:opacity-50"
-                >
-                  {submitting ? 'Adding...' : 'Add exercise'}
-                </button>
-              </form>
-            )}
-
-            {moduleData.exercises.length === 0 ? (
-              <div className="border border-white/10 rounded-2xl p-12 text-center space-y-2">
-                <p className="text-zinc-300 font-medium">No exercises yet</p>
-                <p className="text-sm text-zinc-500">Add your first exercise to start reviewing this module.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {moduleData.exercises.map((exercise) => (
-                  <div key={exercise.id} className="border border-white/10 rounded-xl p-5 space-y-2">
-                    <p className="text-sm font-medium text-white">{exercise.questionText}</p>
-                    <p className="text-sm text-zinc-500">{exercise.correctAnswer}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-      </main>
-    </div>
+          ) : (
+            <div className="space-y-2.5">
+              {moduleData.exercises.map((exercise) => (
+                <div key={exercise.id} className="bg-white border border-softfog rounded-card p-4 space-y-1.5 shadow-soft">
+                  <p className="text-sm font-medium text-ink">{exercise.questionText}</p>
+                  <p className="text-sm text-steel">{exercise.correctAnswer}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </Layout>
   );
 }

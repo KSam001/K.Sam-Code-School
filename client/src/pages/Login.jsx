@@ -72,6 +72,8 @@ export default function Login() {
             <input
               type="email"
               required
+              autoComplete="email"
+              aria-label="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email address"
@@ -81,6 +83,8 @@ export default function Login() {
               <input
                 type="password"
                 required
+                autoComplete="current-password"
+                aria-label="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
