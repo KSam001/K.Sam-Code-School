@@ -21,6 +21,8 @@ export default {
         warnbg: '#fffbeb',
         warntext: '#b45309',
         alert: '#ef4444',
+        focusbg: '#eff6ff',
+        focustext: '#1d4ed8',
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import Navbar from '../components/Navbar';
+import Layout from '../components/Layout';
 
 export default function ModulesPage() {
   const navigate = useNavigate();
@@ -67,10 +67,8 @@ export default function ModulesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-canvas">
-      <Navbar />
-
-      <main className="max-w-3xl mx-auto px-4 pb-16 pt-2 space-y-8">
+    <Layout>
+      <div className="space-y-8">
 
         <div>
           <h1 className="text-[22px] font-semibold tracking-tight text-ink mb-1">Curriculum</h1>
@@ -180,7 +178,7 @@ export default function ModulesPage() {
           )}
         </div>
 
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 }
